@@ -1,0 +1,39 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1alpha1
+kind: SecretProviderClass
+metadata:
+  name: azure-sync
+spec:
+  provider: azure
+  secretObjects:                   # [OPTIONAL] SecretObject defines the desired state of synced K8s secret objects
+  - secretName: flight-sb              # name of the Kubernetes Secret object
+    type: Opaque
+    data: 
+    - objectName: "SB-AuthorizationRuleName"   # name of the mounted content to sync, such as the object name or object alias 
+      key: AuthorizationRuleName               # data field to populate. This must match in deployment yaml for key
+    - objectName: "SB-Keys"
+      key: Keys  
+    - objectName: "CosmosdbMasterKey"
+      key: CosmosdbMasterKey
+    - objectName: "BlobKey"
+      key: BlobKey
+  parameters:
+    useVMManagedIdentity: "true"
+    userAssignedIdentityID: "a34cd250-cef2-4892-ae90-303a1cde04d2"
+    keyvaultName: "tibjetbluekeyvault"        # the name of the KeyVault
+    objects: |
+       array:
+         - |
+           objectName: SB-AuthorizationRuleName # key vault secret name
+           objectType: secret       # object types: secret, key or cert
+         - |
+           objectName: SB-Keys # key vault secret name
+           objectType: secret       # object types: secret, key or cert
+         - |
+           objectName: CosmosdbMasterKey # key vault secret name
+           objectType: secret       # object types: secret, key or cert
+         - |
+           objectName: BlobKey # key vault secret name
+           objectType: secret       # object types: secret, key or cert
+    tenantId: "cde6fa59-abb3-4971-be01-2443c417cbda" # the tenant ID of the KeyVault
+    resourceGroup: JetBlue
+    subscriptionId: 4199aa10-7221-4547-aea2-ccc488438efb

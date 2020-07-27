@@ -1,0 +1,6 @@
+{
+  "data": {
+    "sessionName": "Launch Configuration 1"
+  },
+  "flowUri": "res://flow:toJson"
+}

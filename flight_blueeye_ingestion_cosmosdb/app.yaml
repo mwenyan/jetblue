@@ -1,0 +1,57 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: flight-blueeye-ingestion-cosmosdb-app-deployment
+spec:
+  selector:
+    matchLabels:
+      app: flight-blueeye-ingestion-cosmosdb-app
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: flight-blueeye-ingestion-cosmosdb-app
+    spec:
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-sync"      
+      containers:
+      - name: flight-blueeye-ingestion-cosmosdb-app
+        image: tibjetblueontainers.azurecr.io/flight_blueeye_ingestion_cosmosdb:1.0
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: secrets-store-inline
+            mountPath: "/mnt/secrets-store"
+            readOnly: true    
+        ports:
+        - containerPort: 7777
+        envFrom:
+          - configMapRef:
+              name: flight-blueeye-ingestion-cosmosd-configmap
+        env:
+          - name: "FLOGO_APP_PROPS_ENV"
+            value: auto 
+          - name: FLOGO_HTTP_SERVICE_PORT
+            value: "7777"   
+          - name: FLOGO_APP_MON_SERVICE_CONFIG
+            value: "{\"host\":\"10.0.207.57\",\"port\":\"7337\"}"                            
+          - name: AZURESERVICEBUS_JETBLUE_AZURESERVICEBUS_AUTHORIZATION_RULE_NAME
+            valueFrom:
+                secretKeyRef:
+                  name: flight-sb
+                  key: AuthorizationRuleName
+          - name: "AZURESERVICEBUS_JETBLUE_AZURESERVICEBUS_PRIMARY_SECONDARY_KEY"
+            valueFrom:
+                secretKeyRef:
+                  name: flight-sb
+                  key: Keys 
+          - name: "AZURECOSMOSDB_COSMOSDB5_AZURE_MASTER_KEY"
+            valueFrom:
+                secretKeyRef:
+                  name: flight-sb
+                  key:  CosmosdbMasterKey                                  
+            

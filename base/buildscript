@@ -1,0 +1,5 @@
+#!/bin/bash
+export FLOGO_HOME=
+source $HOME/.bash_profile
+$FLOGO_HOME/bin/builder-linux_amd64 build
+docker build -f Dockerfile -t flogoengine:2.9 .

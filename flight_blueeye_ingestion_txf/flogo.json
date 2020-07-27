@@ -1,0 +1,542 @@
+{
+    "imports": [
+        "github.com/project-flogo/flow",
+        "github.com/project-flogo/flow/activity/subflow",
+        "github.com/project-flogo/contrib/activity/log",
+        "git.tibco.com/git/product/ipaas/wi-azservicebus.git/src/app/AzureServiceBus/activity/publish",
+        "github.com/project-flogo/contrib/activity/actreturn",
+        "github.com/project-flogo/contrib/activity/xml2json",
+        "git.tibco.com/git/product/ipaas/wi-azservicebus.git/src/app/AzureServiceBus/trigger/topicsubscriber",
+        "git.tibco.com/git/product/ipaas/wi-contrib.git/function/utility"
+    ],
+    "name": "flight_blueeye_ingestion",
+    "description": "",
+    "version": "1.0.0",
+    "type": "flogo:app",
+    "appModel": "1.1.1",
+    "feVersion": "2.9.0",
+    "triggers": [
+        {
+            "ref": "#topicsubscriber",
+            "name": "azservicebus-topicsubscriber-trigger",
+            "description": "",
+            "settings": {
+                "azservicebusConnection": {
+                    "id": "7ddde530-bbaa-11ea-be7a-bb808c14e084",
+                    "type": "flogo:connector",
+                    "version": "1.1.0",
+                    "name": "azservicebus-connection",
+                    "hashTags": [],
+                    "inputMappings": {},
+                    "outputMappings": {},
+                    "iteratorMappings": {},
+                    "title": "Microsoft Azure ServiceBus Connector",
+                    "description": "Establish connection to your Azure ServiceBus account",
+                    "ref": "git.tibco.com/git/product/ipaas/wi-azservicebus.git/src/app/AzureServiceBus/connector/connection",
+                    "settings": [
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "required": true,
+                            "display": {
+                                "name": "Connection Name",
+                                "visible": true
+                            },
+                            "value": "JetBlue_AzureServiceBus"
+                        },
+                        {
+                            "name": "description",
+                            "type": "string",
+                            "display": {
+                                "name": "Description",
+                                "visible": true
+                            },
+                            "value": ""
+                        },
+                        {
+                            "name": "resourceURI",
+                            "type": "string",
+                            "required": true,
+                            "display": {
+                                "name": "Service Bus Namespace",
+                                "description": "Provide the Namespace name without prefix .servicebus.windows.net",
+                                "visible": true,
+                                "appPropertySupport": true
+                            },
+                            "value": "=$property[\"AzureServiceBus.JetBlue_AzureServiceBus.Service_Bus_Namespace\"]"
+                        },
+                        {
+                            "name": "authorizationRuleName",
+                            "type": "string",
+                            "required": true,
+                            "display": {
+                                "name": "Authorization Rule Name",
+                                "visible": true,
+                                "appPropertySupport": true
+                            },
+                            "value": "=$property[\"AzureServiceBus.JetBlue_AzureServiceBus.Authorization_Rule_Name\"]"
+                        },
+                        {
+                            "name": "primarysecondaryKey",
+                            "type": "string",
+                            "required": true,
+                            "display": {
+                                "name": "Primary/Secondary Key",
+                                "visible": true,
+                                "type": "password",
+                                "encryptable": true,
+                                "appPropertySupport": true
+                            },
+                            "value": "=$property[\"AzureServiceBus.JetBlue_AzureServiceBus.Primary/Secondary_Key\"]"
+                        },
+                        {
+                            "name": "configProperties",
+                            "type": "string",
+                            "required": true,
+                            "display": {
+                                "visible": false
+                            },
+                            "value": ""
+                        },
+                        {
+                            "name": "DocsMetadata",
+                            "type": "string",
+                            "required": true,
+                            "display": {
+                                "visible": false
+                            },
+                            "value": "{\n      \"entityTypes\":[\"Queue\",\"Topic\"],\n      \"paths\": {\n        \"QueueReceive\":{\n          \"summary\": \"Queue Receiver\",\n          \"action\": \"QueueReceive\",\n          \"output\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"messageString\": {\"type\": \"string\"},\n                  \"brokerProperties\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"ContentType\": { \"type\" : \"string\"},\n                        \"CorrelationId\": {\"type\" : \"string\"},\n                        \"Label\": {\"type\" : \"string\"},\n                        \"PartitionKey\": {\"type\" : \"string\"},\n                        \"ReplyTo\": {\"type\" : \"string\"},\n                        \"SessionId\": {\"type\" : \"string\"},\n                        \"TimeToLive\": { \"type\" : \"integer\"},\n                        \"To\": {\"type\" : \"string\"}\n                    }\n                  }\n                }\n            }\n        },\n        \"TopicSubscribe\":{\n          \"summary\": \"Topic Subscriber\",\n          \"action\": \"TopicSubscribe\",\n          \"output\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"messageString\": {\"type\": \"string\"},\n                  \"brokerProperties\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"ContentType\": { \"type\" : \"string\"},\n                        \"CorrelationId\": {\"type\" : \"string\"},\n                        \"Label\": {\"type\" : \"string\"},\n                        \"PartitionKey\": {\"type\" : \"string\"},\n                        \"ReplyTo\": {\"type\" : \"string\"},\n                        \"SessionId\": {\"type\" : \"string\"},\n                        \"TimeToLive\": { \"type\" : \"integer\"},\n                        \"To\": {\"type\" : \"string\"}\n                    }\n                  }\n                }\n            }\n        },\n        \"Queue\": {\n          \"post\": {\n            \"summary\": \"Publish Message to Queue\",\n            \"action\": \"Queue\",\n            \"schema\": {\n              \"parameters\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"queueName\": { \"type\": \"string\" },\n                  \"messageString\": {\"type\": \"string\"},\n                  \"brokerProperties\": {\"type\": \"object\", \"properties\": {\n                      \"ContentType\": { \"type\" : \"string\"},\n                      \"CorrelationId\": {\"type\" : \"string\"},\n                      \"Label\": {\"type\" : \"string\"},\n                      \"PartitionKey\": {\"type\" : \"string\"},\n                      \"ReplyTo\": {\"type\" : \"string\"},\n                      \"SessionId\": {\"type\" : \"string\"},\n                      \"TimeToLive\": { \"type\" : \"integer\", \"minimum\": 0},\n                      \"To\": {\"type\" : \"string\"}\n                  }\n                }\n              },\n                \"required\": [\n                  \"queueName\",\n                  \"messageString\"\n                ]\n              },\n              \"output\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"responseMessage\": {\"type\": \"string\" }\n                }\n              }\n            }\n          }\n        },\n        \"Topic\": {\n          \"post\": {\n            \"summary\": \"Publish Message to Topic\",\n            \"action\": \"Topic\",\n            \"schema\": {\n              \"parameters\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"topicName\": { \"type\": \"string\" },\n                  \"messageString\": {\"type\": \"string\"},\n                  \"brokerProperties\": {\"type\": \"object\", \"properties\": {\n                      \"ContentType\": { \"type\" : \"string\"},\n                      \"CorrelationId\": {\"type\" : \"string\"},\n                      \"Label\": {\"type\" : \"string\"},\n                      \"PartitionKey\": {\"type\" : \"string\"},\n                      \"ReplyTo\": {\"type\" : \"string\"},\n                      \"SessionId\": {\"type\" : \"string\"},\n                      \"TimeToLive\": { \"type\" : \"integer\", \"minimum\": 0},\n                      \"To\": {\"type\" : \"string\"}\n                  }  }\n              },\n                \"required\": [\n                  \"topicName\",\n                  \"messageString\"\n                ]\n              },\n              \"output\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"responseMessage\": {\"type\": \"string\" }\n          }\n              }\n            }\n          }\n        }\n      }\n    }"
+                        }
+                    ],
+                    "outputs": [],
+                    "inputs": [],
+                    "handler": {
+                        "settings": []
+                    },
+                    "reply": [],
+                    "s3Prefix": "flogo",
+                    "key": "flogo/AzureServiceBus/connector/connection/connector.json",
+                    "display": {
+                        "description": "Establish connection to your Azure ServiceBus account",
+                        "category": "AzureServiceBus",
+                        "visible": true,
+                        "smallIcon": "icons/azure_service_bus.png",
+                        "largeIcon": "icons/azure_service_bus.png"
+                    },
+                    "actions": [
+                        {
+                            "name": "Login"
+                        }
+                    ],
+                    "feature": {},
+                    "loopType": "none",
+                    "loopSettings": [],
+                    "retrySettings": [],
+                    "propertyMap": {},
+                    "keyfield": "name",
+                    "schemaMap": {},
+                    "iteratorAccumulate": false,
+                    "isValid": true,
+                    "lastUpdatedTime": 1593615287395,
+                    "user": "flogo",
+                    "connectorName": "JetBlue_AzureServiceBus",
+                    "connectorDescription": " "
+                }
+            },
+            "id": "AzureServiceBusTopicSubscriber",
+            "handlers": [
+                {
+                    "description": "",
+                    "settings": {
+                        "topic": "=$property[\"App.from_topic_name\"]",
+                        "subscriptionName": "=$property[\"App.subscription_name\"]",
+                        "sessionId": "=$property[\"App.session\"]",
+                        "valueType": "String"
+                    },
+                    "action": {
+                        "ref": "github.com/project-flogo/flow",
+                        "settings": {
+                            "flowURI": "res://flow:publish_canonical"
+                        },
+                        "input": {
+                            "output": "=$.output"
+                        }
+                    },
+                    "schemas": {
+                        "output": {
+                            "output": {
+                                "type": "json",
+                                "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"messageString\":{\"type\":\"string\"},\"brokerProperties\":{\"type\":\"object\",\"properties\":{\"ContentType\":{\"type\":\"string\"},\"CorrelationId\":{\"type\":\"string\"},\"Label\":{\"type\":\"string\"},\"PartitionKey\":{\"type\":\"string\"},\"ReplyTo\":{\"type\":\"string\"},\"SessionId\":{\"type\":\"string\"},\"TimeToLive\":{\"type\":\"integer\"},\"To\":{\"type\":\"string\"}}}}}",
+                                "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"messageString\":{\"type\":\"string\"},\"brokerProperties\":{\"type\":\"object\",\"properties\":{\"ContentType\":{\"type\":\"string\"},\"CorrelationId\":{\"type\":\"string\"},\"Label\":{\"type\":\"string\"},\"PartitionKey\":{\"type\":\"string\"},\"ReplyTo\":{\"type\":\"string\"},\"SessionId\":{\"type\":\"string\"},\"TimeToLive\":{\"type\":\"integer\"},\"To\":{\"type\":\"string\"}}}}}"
+                            }
+                        }
+                    },
+                    "name": "publish_canonical"
+                }
+            ]
+        }
+    ],
+    "resources": [
+        {
+            "id": "flow:publish_canonical",
+            "data": {
+                "name": "publish_canonical",
+                "description": "",
+                "links": [
+                    {
+                        "id": 1,
+                        "from": "StartaSubFlow",
+                        "to": "Log",
+                        "type": "default"
+                    },
+                    {
+                        "id": 2,
+                        "from": "Log",
+                        "to": "AzureServiceBusPublish",
+                        "type": "default"
+                    },
+                    {
+                        "id": 3,
+                        "from": "AzureServiceBusPublish",
+                        "to": "Return",
+                        "type": "default"
+                    }
+                ],
+                "tasks": [
+                    {
+                        "id": "StartaSubFlow",
+                        "name": "StartaSubFlow",
+                        "description": "Simple SubFlow Activity",
+                        "activity": {
+                            "ref": "#subflow",
+                            "settings": {
+                                "flowURI": "res://flow:toJson"
+                            },
+                            "input": {
+                                "xmlstring": "=$flow.output.messageString"
+                            },
+                            "schemas": {
+                                "input": {
+                                    "input": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"xmlstring\":{\"type\":\"string\"}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"xmlstring\":{\"type\":\"string\"}}}"
+                                    }
+                                },
+                                "output": {
+                                    "output": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"jsonobject\":{\"type\":\"object\",\"properties\":{}}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"jsonobject\":{\"type\":\"object\",\"properties\":{}}}}"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "Log",
+                        "name": "Log",
+                        "description": "Logs a message",
+                        "activity": {
+                            "ref": "#log",
+                            "input": {
+                                "message": "=utility.renderJSON($activity[StartaSubFlow].jsonobject, false)",
+                                "addDetails": false
+                            }
+                        }
+                    },
+                    {
+                        "id": "AzureServiceBusPublish",
+                        "name": "AzureServiceBusPublish",
+                        "description": "AzureServiceBus Publish Activity",
+                        "activity": {
+                            "ref": "#publish",
+                            "input": {
+                                "Connection": {
+                                    "id": "7ddde530-bbaa-11ea-be7a-bb808c14e084",
+                                    "type": "flogo:connector",
+                                    "version": "1.1.0",
+                                    "name": "azservicebus-connection",
+                                    "hashTags": [],
+                                    "inputMappings": {},
+                                    "outputMappings": {},
+                                    "iteratorMappings": {},
+                                    "title": "Microsoft Azure ServiceBus Connector",
+                                    "description": "Establish connection to your Azure ServiceBus account",
+                                    "ref": "git.tibco.com/git/product/ipaas/wi-azservicebus.git/src/app/AzureServiceBus/connector/connection",
+                                    "settings": [
+                                        {
+                                            "name": "name",
+                                            "type": "string",
+                                            "required": true,
+                                            "display": {
+                                                "name": "Connection Name",
+                                                "visible": true
+                                            },
+                                            "value": "JetBlue_AzureServiceBus"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "type": "string",
+                                            "display": {
+                                                "name": "Description",
+                                                "visible": true
+                                            },
+                                            "value": ""
+                                        },
+                                        {
+                                            "name": "resourceURI",
+                                            "type": "string",
+                                            "required": true,
+                                            "display": {
+                                                "name": "Service Bus Namespace",
+                                                "description": "Provide the Namespace name without prefix .servicebus.windows.net",
+                                                "visible": true,
+                                                "appPropertySupport": true
+                                            },
+                                            "value": "=$property[\"AzureServiceBus.JetBlue_AzureServiceBus.Service_Bus_Namespace\"]"
+                                        },
+                                        {
+                                            "name": "authorizationRuleName",
+                                            "type": "string",
+                                            "required": true,
+                                            "display": {
+                                                "name": "Authorization Rule Name",
+                                                "visible": true,
+                                                "appPropertySupport": true
+                                            },
+                                            "value": "=$property[\"AzureServiceBus.JetBlue_AzureServiceBus.Authorization_Rule_Name\"]"
+                                        },
+                                        {
+                                            "name": "primarysecondaryKey",
+                                            "type": "string",
+                                            "required": true,
+                                            "display": {
+                                                "name": "Primary/Secondary Key",
+                                                "visible": true,
+                                                "type": "password",
+                                                "encryptable": true,
+                                                "appPropertySupport": true
+                                            },
+                                            "value": "=$property[\"AzureServiceBus.JetBlue_AzureServiceBus.Primary/Secondary_Key\"]"
+                                        },
+                                        {
+                                            "name": "configProperties",
+                                            "type": "string",
+                                            "required": true,
+                                            "display": {
+                                                "visible": false
+                                            },
+                                            "value": ""
+                                        },
+                                        {
+                                            "name": "DocsMetadata",
+                                            "type": "string",
+                                            "required": true,
+                                            "display": {
+                                                "visible": false
+                                            },
+                                            "value": "{\n      \"entityTypes\":[\"Queue\",\"Topic\"],\n      \"paths\": {\n        \"QueueReceive\":{\n          \"summary\": \"Queue Receiver\",\n          \"action\": \"QueueReceive\",\n          \"output\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"messageString\": {\"type\": \"string\"},\n                  \"brokerProperties\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"ContentType\": { \"type\" : \"string\"},\n                        \"CorrelationId\": {\"type\" : \"string\"},\n                        \"Label\": {\"type\" : \"string\"},\n                        \"PartitionKey\": {\"type\" : \"string\"},\n                        \"ReplyTo\": {\"type\" : \"string\"},\n                        \"SessionId\": {\"type\" : \"string\"},\n                        \"TimeToLive\": { \"type\" : \"integer\"},\n                        \"To\": {\"type\" : \"string\"}\n                    }\n                  }\n                }\n            }\n        },\n        \"TopicSubscribe\":{\n          \"summary\": \"Topic Subscriber\",\n          \"action\": \"TopicSubscribe\",\n          \"output\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"messageString\": {\"type\": \"string\"},\n                  \"brokerProperties\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"ContentType\": { \"type\" : \"string\"},\n                        \"CorrelationId\": {\"type\" : \"string\"},\n                        \"Label\": {\"type\" : \"string\"},\n                        \"PartitionKey\": {\"type\" : \"string\"},\n                        \"ReplyTo\": {\"type\" : \"string\"},\n                        \"SessionId\": {\"type\" : \"string\"},\n                        \"TimeToLive\": { \"type\" : \"integer\"},\n                        \"To\": {\"type\" : \"string\"}\n                    }\n                  }\n                }\n            }\n        },\n        \"Queue\": {\n          \"post\": {\n            \"summary\": \"Publish Message to Queue\",\n            \"action\": \"Queue\",\n            \"schema\": {\n              \"parameters\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"queueName\": { \"type\": \"string\" },\n                  \"messageString\": {\"type\": \"string\"},\n                  \"brokerProperties\": {\"type\": \"object\", \"properties\": {\n                      \"ContentType\": { \"type\" : \"string\"},\n                      \"CorrelationId\": {\"type\" : \"string\"},\n                      \"Label\": {\"type\" : \"string\"},\n                      \"PartitionKey\": {\"type\" : \"string\"},\n                      \"ReplyTo\": {\"type\" : \"string\"},\n                      \"SessionId\": {\"type\" : \"string\"},\n                      \"TimeToLive\": { \"type\" : \"integer\", \"minimum\": 0},\n                      \"To\": {\"type\" : \"string\"}\n                  }\n                }\n              },\n                \"required\": [\n                  \"queueName\",\n                  \"messageString\"\n                ]\n              },\n              \"output\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"responseMessage\": {\"type\": \"string\" }\n                }\n              }\n            }\n          }\n        },\n        \"Topic\": {\n          \"post\": {\n            \"summary\": \"Publish Message to Topic\",\n            \"action\": \"Topic\",\n            \"schema\": {\n              \"parameters\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"topicName\": { \"type\": \"string\" },\n                  \"messageString\": {\"type\": \"string\"},\n                  \"brokerProperties\": {\"type\": \"object\", \"properties\": {\n                      \"ContentType\": { \"type\" : \"string\"},\n                      \"CorrelationId\": {\"type\" : \"string\"},\n                      \"Label\": {\"type\" : \"string\"},\n                      \"PartitionKey\": {\"type\" : \"string\"},\n                      \"ReplyTo\": {\"type\" : \"string\"},\n                      \"SessionId\": {\"type\" : \"string\"},\n                      \"TimeToLive\": { \"type\" : \"integer\", \"minimum\": 0},\n                      \"To\": {\"type\" : \"string\"}\n                  }  }\n              },\n                \"required\": [\n                  \"topicName\",\n                  \"messageString\"\n                ]\n              },\n              \"output\": {\n                \"$id\": \"http://example.com/example.json\",\n                \"type\": \"object\",\n                \"definitions\": {},\n                \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n                \"additionalProperties\": false,\n                \"properties\": {\n                  \"responseMessage\": {\"type\": \"string\" }\n          }\n              }\n            }\n          }\n        }\n      }\n    }"
+                                        }
+                                    ],
+                                    "outputs": [],
+                                    "inputs": [],
+                                    "handler": {
+                                        "settings": []
+                                    },
+                                    "reply": [],
+                                    "s3Prefix": "flogo",
+                                    "key": "flogo/AzureServiceBus/connector/connection/connector.json",
+                                    "display": {
+                                        "description": "Establish connection to your Azure ServiceBus account",
+                                        "category": "AzureServiceBus",
+                                        "visible": true,
+                                        "smallIcon": "icons/azure_service_bus.png",
+                                        "largeIcon": "icons/azure_service_bus.png"
+                                    },
+                                    "actions": [
+                                        {
+                                            "name": "Login"
+                                        }
+                                    ],
+                                    "feature": {},
+                                    "loopType": "none",
+                                    "loopSettings": [],
+                                    "retrySettings": [],
+                                    "propertyMap": {},
+                                    "keyfield": "name",
+                                    "schemaMap": {},
+                                    "iteratorAccumulate": false,
+                                    "isValid": true,
+                                    "lastUpdatedTime": 1593615287395,
+                                    "user": "flogo",
+                                    "connectorName": "JetBlue_AzureServiceBus",
+                                    "connectorDescription": " "
+                                },
+                                "entityType": "Topic",
+                                "entityName": "",
+                                "input": {
+                                    "mapping": {
+                                        "parameters": {
+                                            "topicName": "=$property[\"App.to_topic_name\"]",
+                                            "messageString": "=utility.renderJSON($activity[StartaSubFlow].jsonobject, false)",
+                                            "brokerProperties": {
+                                                "SessionId": "=$flow.output.brokerProperties.SessionId"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "schemas": {
+                                "input": {
+                                    "input": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"parameters\":{\"$id\":\"http://example.com/example.json\",\"type\":\"object\",\"definitions\":{},\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"properties\":{\"topicName\":{\"type\":\"string\"},\"messageString\":{\"type\":\"string\"},\"brokerProperties\":{\"type\":\"object\",\"properties\":{\"ContentType\":{\"type\":\"string\"},\"CorrelationId\":{\"type\":\"string\"},\"Label\":{\"type\":\"string\"},\"PartitionKey\":{\"type\":\"string\"},\"ReplyTo\":{\"type\":\"string\"},\"SessionId\":{\"type\":\"string\"},\"TimeToLive\":{\"type\":\"integer\",\"minimum\":0},\"To\":{\"type\":\"string\"}}}},\"required\":[\"topicName\",\"messageString\"]}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"parameters\":{\"$id\":\"http://example.com/example.json\",\"type\":\"object\",\"definitions\":{},\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"additionalProperties\":false,\"properties\":{\"topicName\":{\"type\":\"string\"},\"messageString\":{\"type\":\"string\"},\"brokerProperties\":{\"type\":\"object\",\"properties\":{\"ContentType\":{\"type\":\"string\"},\"CorrelationId\":{\"type\":\"string\"},\"Label\":{\"type\":\"string\"},\"PartitionKey\":{\"type\":\"string\"},\"ReplyTo\":{\"type\":\"string\"},\"SessionId\":{\"type\":\"string\"},\"TimeToLive\":{\"type\":\"integer\",\"minimum\":0},\"To\":{\"type\":\"string\"}}}},\"required\":[\"topicName\",\"messageString\"]}}}"
+                                    }
+                                },
+                                "output": {
+                                    "output": {
+                                        "type": "json",
+                                        "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"responseMessage\":{\"type\":\"string\"}}}",
+                                        "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"responseMessage\":{\"type\":\"string\"}}}"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "Return",
+                        "name": "Return",
+                        "description": "Simple Return Activity",
+                        "activity": {
+                            "ref": "#actreturn"
+                        }
+                    }
+                ],
+                "metadata": {
+                    "input": [
+                        {
+                            "name": "output",
+                            "type": "object",
+                            "schema": {
+                                "type": "json",
+                                "value": "{\"messageString\":{\"type\":\"string\"},\"brokerProperties\":{\"type\":\"object\",\"properties\":{\"ContentType\":{\"type\":\"string\"},\"CorrelationId\":{\"type\":\"string\"},\"Label\":{\"type\":\"string\"},\"PartitionKey\":{\"type\":\"string\"},\"ReplyTo\":{\"type\":\"string\"},\"SessionId\":{\"type\":\"string\"},\"TimeToLive\":{\"type\":\"integer\"},\"To\":{\"type\":\"string\"}}}}"
+                            }
+                        }
+                    ],
+                    "output": [],
+                    "fe_metadata": {
+                        "input": "{\"type\":\"object\",\"title\":\"AzureServiceBusTopicSubscriber\",\"properties\":{\"output\":{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"definitions\":{},\"properties\":{\"messageString\":{\"type\":\"string\"},\"brokerProperties\":{\"type\":\"object\",\"properties\":{\"ContentType\":{\"type\":\"string\"},\"CorrelationId\":{\"type\":\"string\"},\"Label\":{\"type\":\"string\"},\"PartitionKey\":{\"type\":\"string\"},\"ReplyTo\":{\"type\":\"string\"},\"SessionId\":{\"type\":\"string\"},\"TimeToLive\":{\"type\":\"integer\"},\"To\":{\"type\":\"string\"}}}}}}}"
+                    }
+                }
+            }
+        },
+        {
+            "id": "flow:toJson",
+            "data": {
+                "name": "toJson",
+                "description": "",
+                "links": [
+                    {
+                        "id": 1,
+                        "from": "XML2JSONActivity",
+                        "to": "Return",
+                        "type": "default"
+                    }
+                ],
+                "tasks": [
+                    {
+                        "id": "XML2JSONActivity",
+                        "name": "XML2JSONActivity",
+                        "description": "Converts given XML into JSON",
+                        "activity": {
+                            "ref": "#xml2json",
+                            "input": {
+                                "xmlData": "=$flow.xmlstring"
+                            }
+                        }
+                    },
+                    {
+                        "id": "Return",
+                        "name": "Return",
+                        "description": "Simple Return Activity",
+                        "activity": {
+                            "ref": "#actreturn",
+                            "settings": {
+                                "mappings": {
+                                    "jsonobject": "=$activity[XML2JSONActivity].jsonObject"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "metadata": {
+                    "input": [
+                        {
+                            "name": "xmlstring",
+                            "type": "string"
+                        }
+                    ],
+                    "output": [
+                        {
+                            "name": "jsonobject",
+                            "type": "object"
+                        }
+                    ],
+                    "fe_metadata": {
+                        "input": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"xmlstring\":{\"type\":\"string\"}}}",
+                        "output": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"jsonobject\":{\"type\":\"object\",\"properties\":{}}}}"
+                    }
+                }
+            }
+        }
+    ],
+    "properties": [
+        {
+            "name": "AzureServiceBus.JetBlue_AzureServiceBus.Service_Bus_Namespace",
+            "type": "string",
+            "value": "jetblueSB"
+        },
+        {
+            "name": "AzureServiceBus.JetBlue_AzureServiceBus.Authorization_Rule_Name",
+            "type": "string",
+            "value": "RootManageSharedAccessKey"
+        },
+        {
+            "name": "AzureServiceBus.JetBlue_AzureServiceBus.Primary/Secondary_Key",
+            "type": "string",
+            "value": "SECRET:dq8M9ppEK7WCclmx/2A26Uoq65kQYlSjvIY8rcAB+DaDaRhLHlht29xzvqDZs5TslyindcEU5TIy5URS"
+        },
+        {
+            "name": "App.session",
+            "type": "string",
+            "value": "1"
+        },
+        {
+            "name": "App.subscription_name",
+            "type": "string",
+            "value": "flight_blueeye_ingestion"
+        },
+        {
+            "name": "App.from_topic_name",
+            "type": "string",
+            "value": "com.jetblue.flight.blueeye.raw.lz.topic"
+        },
+        {
+            "name": "App.to_topic_name",
+            "type": "string",
+            "value": "com.jetblue.domains.flight.ingestion.topic"
+        }
+    ],
+    "schemas": {
+        "acs": {
+            "type": "json",
+            "value": "{\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"ACS_PDC_Flt_Notif\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"-ACS\": {\n                    \"type\": \"string\"\n                },\n                \"-STL\": {\n                    \"type\": \"string\"\n                },\n                \"-STl\": {\n                    \"type\": \"string\"\n                },\n                \"-UpdateType\": {\n                    \"type\": \"string\"\n                },\n                \"-messageID\": {\n                    \"type\": \"string\"\n                },\n                \"-schemaLocation\": {\n                    \"type\": \"string\"\n                },\n                \"-version\": {\n                    \"type\": \"string\"\n                },\n                \"-xsi\": {\n                    \"type\": \"string\"\n                },\n                \"ACS_Flight\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"-aircraftConfig\": {\n                            \"type\": \"number\"\n                        },\n                        \"-aircraftType\": {\n                            \"type\": \"number\"\n                        },\n                        \"-dest\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-status\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        },\n                        \"DepartAndArrive\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"-estArrival\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-estDep\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-schedArrival\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-schedDep\": {\n                                    \"type\": \"string\"\n                                },\n                                \"DepartureInfo\": {\n                                    \"type\": \"object\",\n                                    \"properties\": {\n                                        \"Gate\": {\n                                            \"type\": \"object\",\n                                            \"properties\": {\n                                                \"-ID\": {\n                                                    \"type\": \"string\"\n                                                },\n                                                \"-lniata\": {\n                                                    \"type\": \"string\"\n                                                }\n                                            }\n                                        }\n                                    }\n                                }\n                            }\n                        },\n                        \"Flight_ID\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"-messageCreate\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-orig\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-partition\": {\n                                    \"type\": \"string\"\n                                },\n                                \"Flight\": {\n                                    \"type\": \"array\",\n                                    \"items\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-carrier\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-date\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-type\": {\n                                                \"type\": \"string\"\n                                            }\n                                        },\n                                        \"required\": [\n                                            \"#content\",\n                                            \"-carrier\",\n                                            \"-date\",\n                                            \"-type\"\n                                        ]\n                                    }\n                                }\n                            }\n                        },\n                        \"Gate\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"#content\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-lniata\": {\n                                    \"type\": \"string\"\n                                }\n                            }\n                        },\n                        \"PDC_Dates\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"-fltClose\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-pdc\": {\n                                    \"type\": \"string\"\n                                }\n                            }\n                        },\n                        \"Sched_OandD\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"-dest\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-orig\": {\n                                    \"type\": \"string\"\n                                }\n                            }\n                        }\n                    }\n                },\n                \"Boarding\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"-cabin\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        },\n                        \"Joining\": {\n                            \"type\": \"number\"\n                        },\n                        \"Sub\": {\n                            \"type\": \"number\"\n                        },\n                        \"Transit\": {\n                            \"type\": \"number\"\n                        }\n                    }\n                },\n                \"PAX_Count\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"#content\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        }\n                    }\n                },\n                \"PAX_Record\": {\n                    \"type\": \"array\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"-ns2\": {\n                                \"type\": \"string\"\n                            },\n                            \"-ns3\": {\n                                \"type\": \"string\"\n                            },\n                            \"-ns4\": {\n                                \"type\": \"string\"\n                            },\n                            \"-xmlns\": {\n                                \"type\": \"string\"\n                            },\n                            \"Baggage\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"Routing\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"Original\": {\n                                                \"type\": \"object\",\n                                                \"properties\": {\n                                                    \"Agent\": {\n                                                        \"type\": \"object\",\n                                                        \"properties\": {\n                                                            \"#content\": {\n                                                                \"type\": \"string\"\n                                                            },\n                                                            \"-code\": {\n                                                                \"type\": \"number\"\n                                                            },\n                                                            \"-station\": {\n                                                                \"type\": \"string\"\n                                                            }\n                                                        }\n                                                    },\n                                                    \"Issue\": {\n                                                        \"type\": \"string\"\n                                                    },\n                                                    \"Item\": {\n                                                        \"type\": \"object\",\n                                                        \"properties\": {\n                                                            \"Flight\": {\n                                                                \"type\": \"object\",\n                                                                \"properties\": {\n                                                                    \"#content\": {\n                                                                        \"type\": \"string\"\n                                                                    },\n                                                                    \"-carrier\": {\n                                                                        \"type\": \"string\"\n                                                                    },\n                                                                    \"-date\": {\n                                                                        \"type\": \"string\"\n                                                                    }\n                                                                }\n                                                            },\n                                                            \"OandD\": {\n                                                                \"type\": \"object\",\n                                                                \"properties\": {\n                                                                    \"-dest\": {\n                                                                        \"type\": \"string\"\n                                                                    },\n                                                                    \"-orig\": {\n                                                                        \"type\": \"string\"\n                                                                    }\n                                                                }\n                                                            }\n                                                        }\n                                                    },\n                                                    \"Num\": {\n                                                        \"type\": \"number\"\n                                                    }\n                                                }\n                                            },\n                                            \"Tag\": {\n                                                \"type\": \"object\",\n                                                \"properties\": {\n                                                    \"HandlingInds\": {\n                                                        \"type\": \"object\",\n                                                        \"properties\": {\n                                                            \"-edifactAdd\": {\n                                                                \"type\": \"number\"\n                                                            }\n                                                        }\n                                                    },\n                                                    \"NameId\": {\n                                                        \"type\": \"number\"\n                                                    },\n                                                    \"Num\": {\n                                                        \"type\": \"number\"\n                                                    }\n                                                }\n                                            }\n                                        }\n                                    },\n                                    \"Total\": {\n                                        \"type\": \"number\"\n                                    }\n                                }\n                            },\n                            \"DocX\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"TravelDoc\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-code\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"Pax\": {\n                                                \"type\": \"object\",\n                                                \"properties\": {\n                                                    \"#content\": {\n                                                        \"type\": \"string\"\n                                                    },\n                                                    \"-dob\": {\n                                                        \"type\": \"string\"\n                                                    },\n                                                    \"-first\": {\n                                                        \"type\": \"string\"\n                                                    },\n                                                    \"-gender\": {\n                                                        \"type\": \"string\"\n                                                    }\n                                                }\n                                            }\n                                        }\n                                    }\n                                }\n                            },\n                            \"Flight\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"CheckInNbr\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"ClassOfService\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-inventory\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"Codeshare\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-airline\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"GroupRes\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"Identification\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-dHS_ID\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-nameID\": {\n                                                \"type\": \"number\"\n                                            },\n                                            \"FF\": {\n                                                \"type\": \"object\",\n                                                \"properties\": {\n                                                    \"-tier\": {\n                                                        \"type\": \"number\"\n                                                    }\n                                                }\n                                            },\n                                            \"Name_First\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"Name_Last\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"Inds\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-revenue\": {\n                                                \"type\": \"number\"\n                                            }\n                                        }\n                                    },\n                                    \"MarketedAs\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-airline\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"OandD_PNR\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-dest\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-orig\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"PaxType\": {\n                                        \"type\": \"string\"\n                                    }\n                                }\n                            },\n                            \"PAX_ID\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"#content\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"-itinID\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"-pnrCreate\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"-resID\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"-uniqueID\": {\n                                        \"type\": \"string\"\n                                    }\n                                }\n                            },\n                            \"Seat\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"-cabin\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Seat\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-ltr\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-row\": {\n                                                \"type\": \"number\"\n                                            }\n                                        }\n                                    }\n                                }\n                            },\n                            \"Security_Mandate_Statuses\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"Status\": {\n                                        \"type\": \"array\",\n                                        \"items\": {\n                                            \"type\": \"object\",\n                                            \"properties\": {\n                                                \"-countryCd\": {\n                                                    \"type\": \"string\"\n                                                },\n                                                \"-mandate\": {\n                                                    \"type\": \"string\"\n                                                },\n                                                \"-status\": {\n                                                    \"type\": \"string\"\n                                                }\n                                            },\n                                            \"required\": [\n                                                \"-countryCd\",\n                                                \"-mandate\",\n                                                \"-status\"\n                                            ]\n                                        }\n                                    }\n                                }\n                            },\n                            \"VCR\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"-class\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"-fareBasisCd\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"PaxInds\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-exist\": {\n                                                \"type\": \"number\"\n                                            },\n                                            \"-inUse\": {\n                                                \"type\": \"number\"\n                                            },\n                                            \"-selectedDisaciatedInd\": {\n                                                \"type\": \"number\"\n                                            }\n                                        }\n                                    },\n                                    \"VCR_ID\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-airlineNum\": {\n                                                \"type\": \"number\"\n                                            },\n                                            \"-create\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-serial\": {\n                                                \"type\": \"number\"\n                                            }\n                                        }\n                                    }\n                                }\n                            },\n                            \"Inbound\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"BookedClass\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Carrier\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Dest\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Flight\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"OperationDate\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Origin\": {\n                                        \"type\": \"string\"\n                                    }\n                                }\n                            }\n                        },\n                        \"required\": [\n                            \"-ns2\",\n                            \"-ns3\",\n                            \"-ns4\",\n                            \"-xmlns\",\n                            \"Baggage\",\n                            \"DocX\",\n                            \"Flight\",\n                            \"PAX_ID\",\n                            \"Seat\",\n                            \"Security_Mandate_Statuses\",\n                            \"VCR\"\n                        ]\n                    }\n                },\n                \"PDC_CreateDate\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"#content\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        }\n                    }\n                },\n                \"Transaction_Details\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-processID\": {\n                            \"type\": \"number\"\n                        },\n                        \"-sourceID\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        },\n                        \"Client_Entry_Info\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"#content\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-agentSabreSine\": {\n                                    \"type\": \"string\"\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "fe_metadata": "{\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"ACS_PDC_Flt_Notif\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"-ACS\": {\n                    \"type\": \"string\"\n                },\n                \"-STL\": {\n                    \"type\": \"string\"\n                },\n                \"-STl\": {\n                    \"type\": \"string\"\n                },\n                \"-UpdateType\": {\n                    \"type\": \"string\"\n                },\n                \"-messageID\": {\n                    \"type\": \"string\"\n                },\n                \"-schemaLocation\": {\n                    \"type\": \"string\"\n                },\n                \"-version\": {\n                    \"type\": \"string\"\n                },\n                \"-xsi\": {\n                    \"type\": \"string\"\n                },\n                \"ACS_Flight\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"-aircraftConfig\": {\n                            \"type\": \"number\"\n                        },\n                        \"-aircraftType\": {\n                            \"type\": \"number\"\n                        },\n                        \"-dest\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-status\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        },\n                        \"DepartAndArrive\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"-estArrival\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-estDep\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-schedArrival\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-schedDep\": {\n                                    \"type\": \"string\"\n                                },\n                                \"DepartureInfo\": {\n                                    \"type\": \"object\",\n                                    \"properties\": {\n                                        \"Gate\": {\n                                            \"type\": \"object\",\n                                            \"properties\": {\n                                                \"-ID\": {\n                                                    \"type\": \"string\"\n                                                },\n                                                \"-lniata\": {\n                                                    \"type\": \"string\"\n                                                }\n                                            }\n                                        }\n                                    }\n                                }\n                            }\n                        },\n                        \"Flight_ID\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"-messageCreate\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-orig\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-partition\": {\n                                    \"type\": \"string\"\n                                },\n                                \"Flight\": {\n                                    \"type\": \"array\",\n                                    \"items\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-carrier\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-date\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-type\": {\n                                                \"type\": \"string\"\n                                            }\n                                        },\n                                        \"required\": [\n                                            \"#content\",\n                                            \"-carrier\",\n                                            \"-date\",\n                                            \"-type\"\n                                        ]\n                                    }\n                                }\n                            }\n                        },\n                        \"Gate\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"#content\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-lniata\": {\n                                    \"type\": \"string\"\n                                }\n                            }\n                        },\n                        \"PDC_Dates\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"-fltClose\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-pdc\": {\n                                    \"type\": \"string\"\n                                }\n                            }\n                        },\n                        \"Sched_OandD\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"-dest\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-orig\": {\n                                    \"type\": \"string\"\n                                }\n                            }\n                        }\n                    }\n                },\n                \"Boarding\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"-cabin\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        },\n                        \"Joining\": {\n                            \"type\": \"number\"\n                        },\n                        \"Sub\": {\n                            \"type\": \"number\"\n                        },\n                        \"Transit\": {\n                            \"type\": \"number\"\n                        }\n                    }\n                },\n                \"PAX_Count\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"#content\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        }\n                    }\n                },\n                \"PAX_Record\": {\n                    \"type\": \"array\",\n                    \"items\": {\n                        \"type\": \"object\",\n                        \"properties\": {\n                            \"-ns2\": {\n                                \"type\": \"string\"\n                            },\n                            \"-ns3\": {\n                                \"type\": \"string\"\n                            },\n                            \"-ns4\": {\n                                \"type\": \"string\"\n                            },\n                            \"-xmlns\": {\n                                \"type\": \"string\"\n                            },\n                            \"Baggage\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"Routing\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"Original\": {\n                                                \"type\": \"object\",\n                                                \"properties\": {\n                                                    \"Agent\": {\n                                                        \"type\": \"object\",\n                                                        \"properties\": {\n                                                            \"#content\": {\n                                                                \"type\": \"string\"\n                                                            },\n                                                            \"-code\": {\n                                                                \"type\": \"number\"\n                                                            },\n                                                            \"-station\": {\n                                                                \"type\": \"string\"\n                                                            }\n                                                        }\n                                                    },\n                                                    \"Issue\": {\n                                                        \"type\": \"string\"\n                                                    },\n                                                    \"Item\": {\n                                                        \"type\": \"object\",\n                                                        \"properties\": {\n                                                            \"Flight\": {\n                                                                \"type\": \"object\",\n                                                                \"properties\": {\n                                                                    \"#content\": {\n                                                                        \"type\": \"string\"\n                                                                    },\n                                                                    \"-carrier\": {\n                                                                        \"type\": \"string\"\n                                                                    },\n                                                                    \"-date\": {\n                                                                        \"type\": \"string\"\n                                                                    }\n                                                                }\n                                                            },\n                                                            \"OandD\": {\n                                                                \"type\": \"object\",\n                                                                \"properties\": {\n                                                                    \"-dest\": {\n                                                                        \"type\": \"string\"\n                                                                    },\n                                                                    \"-orig\": {\n                                                                        \"type\": \"string\"\n                                                                    }\n                                                                }\n                                                            }\n                                                        }\n                                                    },\n                                                    \"Num\": {\n                                                        \"type\": \"number\"\n                                                    }\n                                                }\n                                            },\n                                            \"Tag\": {\n                                                \"type\": \"object\",\n                                                \"properties\": {\n                                                    \"HandlingInds\": {\n                                                        \"type\": \"object\",\n                                                        \"properties\": {\n                                                            \"-edifactAdd\": {\n                                                                \"type\": \"number\"\n                                                            }\n                                                        }\n                                                    },\n                                                    \"NameId\": {\n                                                        \"type\": \"number\"\n                                                    },\n                                                    \"Num\": {\n                                                        \"type\": \"number\"\n                                                    }\n                                                }\n                                            }\n                                        }\n                                    },\n                                    \"Total\": {\n                                        \"type\": \"number\"\n                                    }\n                                }\n                            },\n                            \"DocX\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"TravelDoc\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-code\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"Pax\": {\n                                                \"type\": \"object\",\n                                                \"properties\": {\n                                                    \"#content\": {\n                                                        \"type\": \"string\"\n                                                    },\n                                                    \"-dob\": {\n                                                        \"type\": \"string\"\n                                                    },\n                                                    \"-first\": {\n                                                        \"type\": \"string\"\n                                                    },\n                                                    \"-gender\": {\n                                                        \"type\": \"string\"\n                                                    }\n                                                }\n                                            }\n                                        }\n                                    }\n                                }\n                            },\n                            \"Flight\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"CheckInNbr\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"ClassOfService\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-inventory\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"Codeshare\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-airline\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"GroupRes\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"Identification\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-dHS_ID\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-nameID\": {\n                                                \"type\": \"number\"\n                                            },\n                                            \"FF\": {\n                                                \"type\": \"object\",\n                                                \"properties\": {\n                                                    \"-tier\": {\n                                                        \"type\": \"number\"\n                                                    }\n                                                }\n                                            },\n                                            \"Name_First\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"Name_Last\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"Inds\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-revenue\": {\n                                                \"type\": \"number\"\n                                            }\n                                        }\n                                    },\n                                    \"MarketedAs\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-airline\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"OandD_PNR\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-dest\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-orig\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    },\n                                    \"PaxType\": {\n                                        \"type\": \"string\"\n                                    }\n                                }\n                            },\n                            \"PAX_ID\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"#content\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"-itinID\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"-pnrCreate\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"-resID\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"-uniqueID\": {\n                                        \"type\": \"string\"\n                                    }\n                                }\n                            },\n                            \"Seat\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"-cabin\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Seat\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-ltr\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-row\": {\n                                                \"type\": \"number\"\n                                            }\n                                        }\n                                    }\n                                }\n                            },\n                            \"Security_Mandate_Statuses\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"Status\": {\n                                        \"type\": \"array\",\n                                        \"items\": {\n                                            \"type\": \"object\",\n                                            \"properties\": {\n                                                \"-countryCd\": {\n                                                    \"type\": \"string\"\n                                                },\n                                                \"-mandate\": {\n                                                    \"type\": \"string\"\n                                                },\n                                                \"-status\": {\n                                                    \"type\": \"string\"\n                                                }\n                                            },\n                                            \"required\": [\n                                                \"-countryCd\",\n                                                \"-mandate\",\n                                                \"-status\"\n                                            ]\n                                        }\n                                    }\n                                }\n                            },\n                            \"VCR\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"-class\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"-fareBasisCd\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"PaxInds\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"-exist\": {\n                                                \"type\": \"number\"\n                                            },\n                                            \"-inUse\": {\n                                                \"type\": \"number\"\n                                            },\n                                            \"-selectedDisaciatedInd\": {\n                                                \"type\": \"number\"\n                                            }\n                                        }\n                                    },\n                                    \"VCR_ID\": {\n                                        \"type\": \"object\",\n                                        \"properties\": {\n                                            \"#content\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-airlineNum\": {\n                                                \"type\": \"number\"\n                                            },\n                                            \"-create\": {\n                                                \"type\": \"string\"\n                                            },\n                                            \"-serial\": {\n                                                \"type\": \"number\"\n                                            }\n                                        }\n                                    }\n                                }\n                            },\n                            \"Inbound\": {\n                                \"type\": \"object\",\n                                \"properties\": {\n                                    \"BookedClass\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Carrier\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Dest\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Flight\": {\n                                        \"type\": \"number\"\n                                    },\n                                    \"OperationDate\": {\n                                        \"type\": \"string\"\n                                    },\n                                    \"Origin\": {\n                                        \"type\": \"string\"\n                                    }\n                                }\n                            }\n                        },\n                        \"required\": [\n                            \"-ns2\",\n                            \"-ns3\",\n                            \"-ns4\",\n                            \"-xmlns\",\n                            \"Baggage\",\n                            \"DocX\",\n                            \"Flight\",\n                            \"PAX_ID\",\n                            \"Seat\",\n                            \"Security_Mandate_Statuses\",\n                            \"VCR\"\n                        ]\n                    }\n                },\n                \"PDC_CreateDate\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"#content\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        }\n                    }\n                },\n                \"Transaction_Details\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"-ns2\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns3\": {\n                            \"type\": \"string\"\n                        },\n                        \"-ns4\": {\n                            \"type\": \"string\"\n                        },\n                        \"-processID\": {\n                            \"type\": \"number\"\n                        },\n                        \"-sourceID\": {\n                            \"type\": \"string\"\n                        },\n                        \"-xmlns\": {\n                            \"type\": \"string\"\n                        },\n                        \"Client_Entry_Info\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"#content\": {\n                                    \"type\": \"string\"\n                                },\n                                \"-agentSabreSine\": {\n                                    \"type\": \"string\"\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}"
+        }
+    },
+    "connections": {},
+    "contrib": "W3sicmVmIjoiZ2l0LnRpYmNvLmNvbS9naXQvcHJvZHVjdC9pcGFhcy93aS1henNlcnZpY2VidXMuZ2l0L3NyYy9hcHAvQXp1cmVTZXJ2aWNlQnVzIiwiczNsb2NhdGlvbiI6IntVU0VSSUR9L0F6dXJlU2VydmljZUJ1cyJ9LHsicmVmIjoiZ2l0aHViLmNvbS9wcm9qZWN0LWZsb2dvL2NvbnRyaWIvYWN0aXZpdHkvbG9nIiwiczNsb2NhdGlvbiI6IntVU0VSSUR9L0RlZmF1bHQvYWN0aXZpdHkvbG9nIn0seyJyZWYiOiJnaXRodWIuY29tL3Byb2plY3QtZmxvZ28vY29udHJpYi9hY3Rpdml0eS94bWwyanNvbiIsInMzbG9jYXRpb24iOiJ7VVNFUklEfS9EZWZhdWx0L2FjdGl2aXR5L3htbDJqc29uIn1d",
+    "fe_metadata": "UEsDBAoAAAAIACih8FCrqSRGFQAAABMAAAAIAAAAYXBwLmpzb26rViopykxPTy1yy8kvL1ayio6tBQBQSwECFAAKAAAACAAoofBQq6kkRhUAAAATAAAACAAAAAAAAAAAAAAAAAAAAAAAYXBwLmpzb25QSwUGAAAAAAEAAQA2AAAAOwAAAAAA"
+}
