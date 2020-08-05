@@ -1,0 +1,12 @@
+<testsuites>
+	<testsuite tests="3" failures="2" errors="0" time="0.186" name="flight_blueeye_ingestion">
+		<properties></properties>
+		<testcase classname="test_toJson" name="test_toJson.json/test numeric value" time="0"></testcase>
+		<testcase classname="test_toJson" name="test_toJson.json/object compare" time="0">
+			<failure message="expected value map[a:1 b:2 c:true], actual value map[a:2 b:3 c:false]" type=""></failure>
+		</testcase>
+		<testcase classname="test_toJson" name="test_toJson.json/verify string value" time="0">
+			<failure message="expected value abc is not equal to actual value abcd" type=""></failure>
+		</testcase>
+	</testsuite>
+</testsuites>
