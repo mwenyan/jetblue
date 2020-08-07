@@ -1,7 +1,0 @@
-{
-  "data": {
-    "xmlstring": "<testing>true</testing>",
-    "sessionName": "unit_test"
-  },
-  "flowUri": "res://flow:toJson"
-}
