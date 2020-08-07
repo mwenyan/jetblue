@@ -2,7 +2,7 @@ pipeline {
     agent {
         node {
                 label 'master'
-                customWorkspace '/home/mwenyan/projects/flight_blueeye_ingestion_txf'
+                customWorkspace '/home/mwenyan/projects'
         }
     }
     
@@ -13,7 +13,7 @@ pipeline {
     
     environment {
         FLOGO_HOME = '/home/mwenyan/flogo/2.9'
-        APP = '/home/mwenyan/projects/flight_blueeye_ingestion_txf'
+        APP = 'flight_blueeye_ingestion_txf'
         IMAGE_NAME = 'flight_blueeye_ingestion'
         TAG = 'v1.2'
         IMAGE = "${IMAGE_NAME}:${TAG}"
@@ -23,14 +23,14 @@ pipeline {
             steps {
                echo "run unit tests...."
 
-                sh "funit test -e /home/mwenyan/base/engine-linux_amd64 -a flogo.json -d unittest"
+                sh "funit test -e /home/mwenyan/base/engine-linux_amd64 -a ${APP}/flogo.json -d ${APP}/unittest"
 
                 echo "run unit tests....done"
             }
         }
         stage('Build Docker Image') {
             steps {
-                sh 'sed -i "s/Primary\\/Secondary/Primary_Secondary/g" flogo.json'
+                sh 'sed -i "s/Primary\\/Secondary/Primary_Secondary/g" ${APP}/flogo.json'
               
                 sh 'echo "building app docker iamge..."'
                 sh 'sudo docker build -f Dockerfile -t ${IMAGE} .' 
@@ -56,10 +56,10 @@ pipeline {
               
                sh '''
                    echo "create/update configmap"
-                   kubectl create configmap flight-blueeye-ingestion-configmap --from-env-file=env.properties -o yaml --dry-run | kubectl apply -f -
+                   kubectl create configmap flight-blueeye-ingestion-configmap --from-env-file=${APP}/env.properties -o yaml --dry-run | kubectl apply -f -
                
                    echo "deploy app..."
-                   kubectl apply -f app.yaml
+                   kubectl apply -f ${APP}/app.yaml
 
                '''
             }
