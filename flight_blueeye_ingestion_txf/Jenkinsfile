@@ -33,7 +33,7 @@ pipeline {
                 sh 'sed -i "s/Primary\\/Secondary/Primary_Secondary/g" ${APP}/flogo.json'
               
                 sh 'echo "building app docker iamge..."'
-                sh 'sudo docker build -f Dockerfile -t ${IMAGE} .' 
+                sh 'sudo docker build -f ${APP}/Dockerfile -t ${IMAGE} ${APP}' 
                 
                 sh 'echo "tagging docker iamge..."'
                 sh 'sudo docker tag ${IMAGE} tibjetblueontainers.azurecr.io/${IMAGE}'
