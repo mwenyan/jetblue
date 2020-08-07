@@ -68,7 +68,7 @@ pipeline {
     post {
         always {
               sh 'echo ${APP}/unittest/outputs/report.xml'
-              sh 'echo ${env.APP}/unittest/outputs/report.xml'
+            
             junit allowEmptyResults: false, testResults: '${APP}/unittest/outputs/report.xml'
         }
     }
