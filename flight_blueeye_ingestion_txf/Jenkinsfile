@@ -27,6 +27,11 @@ pipeline {
 
                 echo "run unit tests....done"
             }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'flight_blueeye_ingestion_txf/unittest/outputs/report.xml'
+                }
+            }
         }
         stage('Build Docker Image') {
             steps {
@@ -63,12 +68,6 @@ pipeline {
 
                '''
             }
-        }
-    }
-    post {
-        always {
-             
-            junit allowEmptyResults: false, testResults: 'flight_blueeye_ingestion_txf/unittest/outputs/report.xml'
         }
     }
 }
