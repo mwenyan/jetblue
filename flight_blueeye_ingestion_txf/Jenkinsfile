@@ -66,6 +66,7 @@ pipeline {
         }
     }
     post {
+        sh 'echo ${APP}/unittest/outputs/report.xml'
         always {
             junit allowEmptyResults: false, testResults: '${APP}/unittest/outputs/report.xml'
         }
