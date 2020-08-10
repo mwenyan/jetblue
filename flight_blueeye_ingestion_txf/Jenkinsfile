@@ -15,8 +15,7 @@ pipeline {
         FLOGO_HOME = '/home/mwenyan/flogo/2.9'
         APP = 'flight_blueeye_ingestion_txf'
         IMAGE_NAME = 'flight_blueeye_ingestion'
-        TAG = 'v1.2'
-        IMAGE = "${IMAGE_NAME}:${TAG}"
+        IMAGE = "${IMAGE_NAME}:${BUILD_NUMBER}"
     }
     stages {
         stage('Unit Test') {
@@ -36,12 +35,14 @@ pipeline {
                 sh 'sudo docker build -f ${APP}/Dockerfile -t ${IMAGE} ${APP}' 
                 
                 sh 'sudo docker tag ${IMAGE} tibjetblueontainers.azurecr.io/${IMAGE}'
+                sh 'sudo docker tag ${IMAGE} tibjetblueontainers.azurecr.io/${IMAGE_NAME}:latest'
                 
                 withCredentials([usernamePassword(credentialsId: 'acr-credentials', passwordVariable: 'ACR_PWD', usernameVariable: 'ACR_USER')]) {
 
                     sh 'sudo docker login -u $ACR_USER -p $ACR_PWD ${ACR_LOGINSERVER}'
                     
                     sh 'sudo docker push tibjetblueontainers.azurecr.io/${IMAGE}'
+                    sh 'sudo docker push tibjetblueontainers.azurecr.io/${IMAGE_NAME}:latest'
                 }
             }
         }
