@@ -21,11 +21,7 @@ pipeline {
     stages {
         stage('Unit Test') {
             steps {
-               echo "run unit tests...."
-
                 sh "funit test -e /home/mwenyan/base/engine-linux_amd64 -a ${APP}/flogo.json -d ${APP}/unittest"
-
-                echo "run unit tests....done"
             }
             post {
                 always {
@@ -37,21 +33,14 @@ pipeline {
             steps {
                 sh 'sed -i "s/Primary\\/Secondary/Primary_Secondary/g" ${APP}/flogo.json'
               
-                sh 'echo "building app docker iamge..."'
                 sh 'sudo docker build -f ${APP}/Dockerfile -t ${IMAGE} ${APP}' 
                 
-                sh 'echo "tagging docker iamge..."'
                 sh 'sudo docker tag ${IMAGE} tibjetblueontainers.azurecr.io/${IMAGE}'
                 
-                sh 'echo "acr login server ${ACR_LOGINSERVER}"'
-                
                 withCredentials([usernamePassword(credentialsId: 'acr-credentials', passwordVariable: 'ACR_PWD', usernameVariable: 'ACR_USER')]) {
-                    sh 'echo $ACR_USER'
-                   
-                    sh 'echo "logging acr..."'
+
                     sh 'sudo docker login -u $ACR_USER -p $ACR_PWD ${ACR_LOGINSERVER}'
                     
-                    sh 'echo "pushing image to acr..."'
                     sh 'sudo docker push tibjetblueontainers.azurecr.io/${IMAGE}'
                 }
             }
@@ -60,12 +49,9 @@ pipeline {
             steps {
               
                sh '''
-                   echo "create/update configmap"
                    kubectl create configmap flight-blueeye-ingestion-configmap --from-env-file=${APP}/env.properties -o yaml --dry-run | kubectl apply -f -
                
-                   echo "deploy app..."
                    kubectl apply -f ${APP}/app.yaml
-
                '''
             }
         }
