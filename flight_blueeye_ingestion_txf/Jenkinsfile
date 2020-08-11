@@ -31,6 +31,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh 'sed -i "s/Primary\\/Secondary/Primary_Secondary/g" ${APP}/flogo.json'
+                sh 'funit prune -a ${APP}/flogo.json'
               
                 sh 'sudo docker build -f ${APP}/Dockerfile -t ${IMAGE} ${APP}' 
                 
