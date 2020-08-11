@@ -1,16 +1,16 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: flight-blueeye-ingestion-app-deployment
+  name: flight-blueeye-ingestion-txf-deployment
 spec:
   selector:
     matchLabels:
-      app: flight-blueeye-ingestion-app
+      app: flight-blueeye-ingestion-txf
   replicas: 1 # tells deployment to run 2 pods matching the template
   template:
     metadata:
       labels:
-        app: flight-blueeye-ingestion-app
+        app: flight-blueeye-ingestion-txf
     spec:
       volumes:
         - name: secrets-store-inline
@@ -20,8 +20,8 @@ spec:
             volumeAttributes:
               secretProviderClass: "azure-sync"      
       containers:
-      - name: flight-blueeye-ingestion-app
-        image: tibjetblueontainers.azurecr.io/flight_blueeye_ingestion:latest
+      - name: flight-blueeye-ingestion-txf
+        image: tibjetblueontainers.azurecr.io/flight_blueeye_ingestion_txf:latest
         imagePullPolicy: Always
         volumeMounts:
           - name: secrets-store-inline
@@ -31,7 +31,7 @@ spec:
         - containerPort: 7777
         envFrom:
           - configMapRef:
-              name: flight-blueeye-ingestion-configmap
+              name: flight-blueeye-ingestion-txf-configmap
         env:
           - name: "FLOGO_APP_PROPS_ENV"
             value: auto 

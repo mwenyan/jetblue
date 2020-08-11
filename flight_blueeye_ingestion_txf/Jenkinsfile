@@ -14,7 +14,7 @@ pipeline {
     environment {
         FLOGO_HOME = '/home/mwenyan/flogo/2.9'
         APP = 'flight_blueeye_ingestion_txf'
-        IMAGE_NAME = 'flight_blueeye_ingestion'
+        IMAGE_NAME = 'flight_blueeye_ingestion_txf'
         IMAGE = "${IMAGE_NAME}:${BUILD_NUMBER}"
     }
     stages {
@@ -50,7 +50,7 @@ pipeline {
             steps {
               
                sh '''
-                   kubectl create configmap flight-blueeye-ingestion-configmap --from-env-file=${APP}/env.properties -o yaml --dry-run | kubectl apply -f -
+                   kubectl create configmap flight-blueeye-ingestion-txf-configmap --from-env-file=${APP}/env.properties -o yaml --dry-run | kubectl apply -f -
                
                    kubectl apply -f ${APP}/app.yaml
                '''
