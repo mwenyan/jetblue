@@ -21,7 +21,7 @@ spec:
               secretProviderClass: "azure-sync"      
       containers:
       - name: flight-blueeye-ingestion-blob-app
-        image: tibjetblueontainers.azurecr.io/flight_blueeye_ingestion_blob:1.0
+        image: tibjetblueontainers.azurecr.io/flight_blueeye_ingestion_blob:latest
         imagePullPolicy: Always
         volumeMounts:
           - name: secrets-store-inline

@@ -1,0 +1,60 @@
+pipeline {
+    agent {
+        node {
+                label 'master'
+                customWorkspace '/home/mwenyan/projects'
+        }
+    }
+    
+    options {
+        timeout(time: 1, unit: 'HOURS') 
+        skipStagesAfterUnstable()
+    }
+    
+    environment {
+        FLOGO_HOME = '/home/mwenyan/flogo/2.9'
+        APP = 'flight_blueeye_ingestion_service'
+        IMAGE_NAME = 'flight_blueeye_ingestion_service'
+        IMAGE = "${IMAGE_NAME}:${BUILD_NUMBER}"
+    }
+    stages {
+        stage('Unit Test') {
+            steps {
+                sh "funit test -e /home/mwenyan/base/engine-linux_amd64 -a ${APP}/flogo.json -d ${APP}/unittest"
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'flight_blueeye_ingestion_service/unittest/outputs/report.xml'
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'sed -i "s/Primary\\/Secondary/Primary_Secondary/g" ${APP}/flogo.json'
+              
+                sh 'sudo docker build -f ${APP}/Dockerfile -t ${IMAGE} ${APP}' 
+                
+                sh 'sudo docker tag ${IMAGE} tibjetblueontainers.azurecr.io/${IMAGE}'
+                sh 'sudo docker tag ${IMAGE} tibjetblueontainers.azurecr.io/${IMAGE_NAME}:latest'
+                
+                withCredentials([usernamePassword(credentialsId: 'acr-credentials', passwordVariable: 'ACR_PWD', usernameVariable: 'ACR_USER')]) {
+
+                    sh 'sudo docker login -u $ACR_USER -p $ACR_PWD ${ACR_LOGINSERVER}'
+                    
+                    sh 'sudo docker push tibjetblueontainers.azurecr.io/${IMAGE}'
+                    sh 'sudo docker push tibjetblueontainers.azurecr.io/${IMAGE_NAME}:latest'
+                }
+            }
+        }
+        stage('Deploy to AKS') {
+            steps {
+              
+               sh '''
+                   kubectl create configmap flight-blueeye-ingestion-service-configmap --from-env-file=${APP}/env.properties -o yaml --dry-run | kubectl apply -f -
+               
+                   kubectl apply -f ${APP}/app.yaml
+               '''
+            }
+        }
+    }
+}
